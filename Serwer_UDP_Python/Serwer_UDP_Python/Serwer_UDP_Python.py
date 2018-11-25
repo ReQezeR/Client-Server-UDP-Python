@@ -51,8 +51,6 @@ def nowy_klient(addr):
             
     
 
-
-
 sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
 server_address = '192.168.1.84'
@@ -76,9 +74,12 @@ while True:
         if flaga_istnienia == False:
             dodaj_klienta(client_address)
             print("Nowy klient!")
+            print(client_address)
             sent = send_ack(sock,raw_data, client_address)
+            #start_new_thread(nowy_klient,(client_address))
             nowy_klient(client_address)
             break
+    
 
         
     
