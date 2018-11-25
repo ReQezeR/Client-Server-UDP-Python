@@ -1,5 +1,6 @@
 import socket
 import time
+import protocol
 
 
 client = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
