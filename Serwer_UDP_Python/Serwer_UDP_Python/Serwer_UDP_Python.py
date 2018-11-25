@@ -1,10 +1,17 @@
 import socket
-import random
 import re
 import protocol
 import time
 import threading
 from _thread import *
+
+
+class Klient():
+    id = 0
+    adres_surowy = ""
+    adres_kluczowy = ""
+    nr_sesji = 0
+
 
 
 tablica_klientow = {}
@@ -59,8 +66,9 @@ while True:
         print("Nowy klient!")
         print(adr_klienta)
         sent = send_ack(sock,client_data, client_address)
-    elif pakiet["id"].isdigit():
+    else:
         send_ack(sock,client_data,client_address)
+        
         print("[ "+pakiet["id"]+" ] "+pakiet["data"])
     
         
