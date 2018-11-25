@@ -35,6 +35,7 @@ def nowy_klient(addr):
         message = message.decode("utf-8")
         print(str(message))
         pakiet = protocol.decode_message(message)
+        protocol.printdecodemessage(pakiet)
         print(pakiet["data"])
             
     
