@@ -12,31 +12,46 @@ class Klient():
     adres_kluczowy = ""
     nr_sesji = 0
 
+    def init_klient(tid,ta_s,ta_k,self):
+        self.id = tid
+        self.adres_surowy = ta_s
+        self.adres_kluczowy = ta_k
+
 
 
 tablica_klientow = {}
-id = 1
+licznik_id = 1
 
 def adr_to_klucz(ca1,ca2):
     return str(ca1)+":"+str(ca2)
 
 
-def dodaj_klienta(addr):
-    global id
+def dodaj_klienta(adr_klienta,client_address):
+    global licznik_id
+    klient_temp = Klient()
+    #klient_temp.init_klient(licznik_id,adr_klienta,client_address) #cos tu nie dziala :/
+    klient_temp.id = licznik_id
+    klient_temp.adres_surowy = client_address
+    klient_temp.adres_kluczowy = adr_klienta
 
-    tablica_klientow[addr] = id
-    print(addr)
-    print("Klient {} otrzymal ID = {} ".format(addr,id))
-    id += 1
+    tablica_klientow[adr_klienta] = klient_temp
     
-   
+    
+    print("Klient {} otrzymal ID = {} ".format(adr_klienta,licznik_id))
+    licznik_id += 1
+    
+def wyslij_do_sesji(sock, adr_klienta, client_data):
+    sesja = tablica_klientow[adr_klienta].nr_sesji
+    for k in tablica_klientow:
+        if tablica_klientow[k].nr_sesji == sesja and tablica_klientow[k].id != tablica_klientow[adr_klienta].id:
+            sock.sendto(client_data, tablica_klientow[k].adres_surowy)
 
-def send_ack(sock,raw_data, client_address):
+def send_ack(sock, raw_data, adr_klienta):
     d = {}
     data = raw_data.decode("utf-8")
     d = protocol.decode_message(data)
-    ack_data = protocol.encode_messsage(time.ctime(time.time()),"ACK",d["status"],d["nr_sekwencyjny"],tablica_klientow[adr_to_klucz(client_address[0],client_address[1])],"").encode("utf-8")
-    sent = sock.sendto(ack_data, client_address)
+    ack_data = protocol.encode_messsage(time.ctime(time.time()),"ACK",d["status"],d["nr_sekwencyjny"],tablica_klientow[adr_klienta].id,"").encode("utf-8")
+    sent = sock.sendto(ack_data, tablica_klientow[adr_klienta].adres_surowy)
     return sent
 
 
@@ -62,13 +77,13 @@ while True:
     pakiet = protocol.decode_message(client_data.decode("utf-8"))
 
     if pakiet["data"] == "CONNECT" and pakiet["id"] == "-1":
-        dodaj_klienta(adr_klienta)
         print("Nowy klient!")
-        print(adr_klienta)
-        sent = send_ack(sock,client_data, client_address)
+        dodaj_klienta(adr_klienta,client_address)
+        #print(adr_klienta)
+        sent = send_ack(sock, client_data, adr_klienta)
     else:
-        send_ack(sock,client_data,client_address)
-        
+        send_ack(sock, client_data, adr_klienta)
+        wyslij_do_sesji(sock, adr_klienta, client_data)
         print("[ "+pakiet["id"]+" ] "+pakiet["data"])
     
         

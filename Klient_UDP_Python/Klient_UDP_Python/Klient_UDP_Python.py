@@ -17,6 +17,8 @@ while True:
     received_message = protocol.decode_message(client.recvfrom(1024)[0].decode("utf-8"))
     if received_message["operacja"]=="ACK":
         print (" [ send success ]")
+    else:
+        print(received_message["id"]+"  "+received_message["data"])
     #print time.time()," : ",client.recv(1024)
     time.sleep(1)
 
