@@ -1,6 +1,6 @@
 import socket
-import protocol
 import random
+import protocol
 import time
 import threading
 from _thread import *
