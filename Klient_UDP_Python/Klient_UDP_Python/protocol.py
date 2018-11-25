@@ -11,7 +11,7 @@ def encode_messsage(operacja,status,nr_sekwencyjny,id,data):
 
 def decode_message(raw_message):
     message = ""
-    result = re.findall('+!(.*?)!', raw_message)
+    result = re.findall('\+\!(.*?)\!', raw_message)
     d["operacja"] = result[0]
     d["status"]  = result[1]
     d["nr_sekwencyjny"] = result[2]
