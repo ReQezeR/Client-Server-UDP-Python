@@ -18,6 +18,7 @@ def dodaj_klienta(addr):
             fe = True
     if fe == False:
         tablica_klientow[addr] = id
+        print(addr)
         print("Klient {} otrzymal ID = {} ".format(addr,id))
         id += 1
         return True
@@ -25,18 +26,28 @@ def dodaj_klienta(addr):
         print("Klient istnieje w bazie! ")
         return True
 
+def send_ack(sock,raw_data, client_address):
+    d = {}
+    data = raw_data.decode("utf-8")
+    d = protocol.decode_message(data)
+    ack_data = protocol.encode_messsage(time.ctime(time.time()),"ACK",d["status"],d["nr_sekwencyjny"],tablica_klientow[client_address],"").encode("utf-8")
+    sent = sock.sendto(ack_data, client_address)
+    return sent
+
 
 
 def nowy_klient(addr):
     pakiet = {}
-    dodaj_klienta(addr)
+    #dodaj_klienta(addr)
     while True:
         message,adr= sock.recvfrom(1024)
+        send_ack(sock,message,adr)
         message = message.decode("utf-8")
+        
         #print(str(message))
         pakiet = protocol.decode_message(message)
         #protocol.printdecodemessage(pakiet)
-        print(pakiet["data"])
+        print("[ "+pakiet["id"]+" ] "+pakiet["data"])
             
     
 
@@ -56,20 +67,18 @@ flaga_istnienia = False
 while True:
     while True:
         raw_data, client_address = sock.recvfrom(1024)
-        print("Echoing data back to " + str(client_address))
-        sent = sock.sendto(raw_data, client_address)
         for n in tablica_klientow:
-            if n == client_address[0]:
+            if n == client_address:
                 flaga_istnienia = True
                 print("OK")
                 break
                 
         if flaga_istnienia == False:
+            dodaj_klienta(client_address)
             print("Nowy klient!")
+            sent = send_ack(sock,raw_data, client_address)
             nowy_klient(client_address)
             break
-
-    print("XD")
 
         
     
