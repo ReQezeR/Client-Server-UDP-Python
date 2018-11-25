@@ -23,7 +23,7 @@ def send_message():
  
         client.sendto(protocol.encode_messsage(time.ctime(time.time()), 0, 0, 0, client_ID, message).encode('utf-8'),
                   dstHost)
-        print("Send: ", message)
+        #print("Send: ", message)
  
 def recv_message():
     while True:
@@ -31,11 +31,12 @@ def recv_message():
  
         if received_message["operacja"] == "ACK":
  
-            print(" [ send success ]")
+            #print(" [ send success ]")
+            flaga = True
  
         else:
  
-            print(received_message["id"] + "  " + received_message["data"])
+            print("[ "+received_message["id"] + " ]> " + received_message["data"])
  
  
 while True:
