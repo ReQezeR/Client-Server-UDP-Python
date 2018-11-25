@@ -33,9 +33,9 @@ def nowy_klient(addr):
     while True:
         message,adr= sock.recvfrom(1024)
         message = message.decode("utf-8")
-        print(str(message))
+        #print(str(message))
         pakiet = protocol.decode_message(message)
-        protocol.printdecodemessage(pakiet)
+        #protocol.printdecodemessage(pakiet)
         print(pakiet["data"])
             
     
