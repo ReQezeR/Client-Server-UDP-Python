@@ -35,7 +35,6 @@ def recv_message():
             flaga = True
  
         else:
- 
             print("[ "+received_message["id"] + " ]> " + received_message["data"])
  
  
