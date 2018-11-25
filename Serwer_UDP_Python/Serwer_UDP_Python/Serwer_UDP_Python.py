@@ -1,5 +1,6 @@
 import socket
 import random
+import re
 import protocol
 import time
 import threading
@@ -27,10 +28,12 @@ def dodaj_klienta(addr):
 
 
 def nowy_klient(addr):
+    pakiet = {}
     dodaj_klienta(addr)
     while True:
         message,adr= sock.recvfrom(1024)
-        print(str(message))
+        pakiet = protocol.decode_message(message)
+        print(pakiet["data"])
             
     
 
