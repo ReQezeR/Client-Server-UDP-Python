@@ -10,47 +10,31 @@ from _thread import *
 tablica_klientow = {}
 id = 1
 
+def adr_to_klucz(ca1,ca2):
+    return str(ca1)+":"+str(ca2)
+
+
 def dodaj_klienta(addr):
     global id
-    fe = False
-    for klucz in tablica_klientow:
-        if addr == klucz:
-            fe = True
-    if fe == False:
-        tablica_klientow[addr] = id
-        print(addr)
-        print("Klient {} otrzymal ID = {} ".format(addr,id))
-        id += 1
-        return True
-    else:
-        print("Klient istnieje w bazie! ")
-        return True
+
+    tablica_klientow[addr] = id
+    print(addr)
+    print("Klient {} otrzymal ID = {} ".format(addr,id))
+    id += 1
+    
+   
 
 def send_ack(sock,raw_data, client_address):
     d = {}
     data = raw_data.decode("utf-8")
     d = protocol.decode_message(data)
-    ack_data = protocol.encode_messsage(time.ctime(time.time()),"ACK",d["status"],d["nr_sekwencyjny"],tablica_klientow[client_address],"").encode("utf-8")
+    ack_data = protocol.encode_messsage(time.ctime(time.time()),"ACK",d["status"],d["nr_sekwencyjny"],tablica_klientow[adr_to_klucz(client_address[0],client_address[1])],"").encode("utf-8")
     sent = sock.sendto(ack_data, client_address)
     return sent
 
 
 
-def nowy_klient(addr):
-    pakiet = {}
-    #dodaj_klienta(addr)
-    while True:
-        message,adr= sock.recvfrom(1024)
-        send_ack(sock,message,adr)
-        message = message.decode("utf-8")
-        
-        #print(str(message))
-        pakiet = protocol.decode_message(message)
-        #protocol.printdecodemessage(pakiet)
-        print("[ "+pakiet["id"]+" ] "+pakiet["data"])
-            
-    
-
+ 
 sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
 server_address = '192.168.1.84'
@@ -60,26 +44,28 @@ server = (server_address, server_port)
 sock.bind(server)
 print("Listening on " + server_address + ":" + str(server_port))
 
+adr_klienta = ""
+pakiet = {}
 
-flaga_istnienia = False
 while True:
-    while True:
-        raw_data, client_address = sock.recvfrom(1024)
-        for n in tablica_klientow:
-            if n == client_address:
-                flaga_istnienia = True
-                print("OK")
-                break
-                
-        if flaga_istnienia == False:
-            dodaj_klienta(client_address)
-            print("Nowy klient!")
-            print(client_address)
-            sent = send_ack(sock,raw_data, client_address)
-            #start_new_thread(nowy_klient,(client_address))
-            nowy_klient(client_address)
-            break
+    client_data, client_address = sock.recvfrom(1024)
+
+    adr_klienta = adr_to_klucz(client_address[0],client_address[1])
+
+    pakiet = protocol.decode_message(client_data.decode("utf-8"))
+
+    if pakiet["data"] == "CONNECT" and pakiet["id"] == "-1":
+        dodaj_klienta(adr_klienta)
+        print("Nowy klient!")
+        print(adr_klienta)
+        sent = send_ack(sock,client_data, client_address)
+    elif pakiet["id"].isdigit():
+        send_ack(sock,client_data,client_address)
+        print("[ "+pakiet["id"]+" ] "+pakiet["data"])
     
+        
+
+print("KONIEC!")
 
         
     
