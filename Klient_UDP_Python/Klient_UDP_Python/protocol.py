@@ -1,39 +1,49 @@
 import re
 
+#=========================================================
+# Podstawowa kolejnosc pól :
 # Czas+!    !Operacja+!    !Status+!   !NSekwencyjny+!     !ID+!   !Dane+!     !
 
+#=========================================================
+# Zmienne globalne :
 d = {}
 
-# Pakiet z Operacja
-def encode_messsage_Operacja(czas,operacja,nr_sekwencyjny,id):
+#=========================================================
+# Funkcje kodujace :
+
+# # Pakiet z Operacja
+def encode_messsage_Operacja(czas,operacja,nr_sekwencyjny,id):# czas, operacja, nr_sekwencyjny, id
     message = ""
     message = "Czas+!{}!Operacja+!{}!NSekwencyjny+!{}!ID+!{}!".format(czas,operacja,nr_sekwencyjny,id)
     return message
 
-# Pakiet z Statusem
-def encode_messsage_Status(czas,status,nr_sekwencyjny,id):
+# # Pakiet z Statusem
+def encode_messsage_Status(czas,status,nr_sekwencyjny,id):# czas, status, nr_sekwencyjny, id
     message = ""
     message = "Czas+!{}!Status+!{}!NSekwencyjny+!{}!ID+!{}!".format(czas,status,nr_sekwencyjny,id)
     return message
 
-# Pakiet z Danymi
-def encode_messsage_Dane(czas,nr_sekwencyjny,id,data):
+# # Pakiet z Danymi
+def encode_messsage_Dane(czas,nr_sekwencyjny,id,data):# czas, nr_sekwencyjny, id, data
     message = ""
     message = "Czas+!{}!NSekwencyjny+!{}!ID+!{}!Dane+!{}!".format(czas,nr_sekwencyjny,id,data)
     return message
 
 
 
+#=========================================================
+# Funkcja odkodowujaca :
 
 def decode_message(raw_message):
     d = {"czas":0,"operacja":0,"status":0,"nr_sekwencyjny":0,"id":0,"data":0}
     
+    result1 = re.findall('\!(\w*?)\+\!', raw_message)# Nazwa pola
 
-    message = ""
-    result1 = re.findall('\!(\w*?)\+\!', raw_message)
-    result2 = re.findall('\+\!(.*?)\!', raw_message)
+    result2 = re.findall('\+\!(.*?)\!', raw_message)# Wartosc pola
+
     # Pole 1
-    d["czas"]=result2[0]
+    d["czas"]=result2[0]# Pole 1 zawsze przyjmuje pierwsza wartosc (czas)
+
     # Pole 2
     if(str(result1[0])=="Operacja"):
         d["operacja"] = result2[1]
@@ -41,11 +51,13 @@ def decode_message(raw_message):
         d["status"] = result2[1]
     elif(result1[0]=="NSekwencyjny"):
         d["nr_sekwencyjny"] = result2[1]
+
     # Pole 3
     if(result1[1]=="NSekwencyjny"):
         d["nr_sekwencyjny"] = result2[2]
     elif(result1[1]=="ID"):
         d["id"] = result2[2]
+
     # Pole 4
     if(result1[2]=="Dane"):
         d["data"] = result2[3]
@@ -55,7 +67,7 @@ def decode_message(raw_message):
     # Zwracamy 
     return d
     
-
+#=========================================================
 def printdecodemessage(d):
     print("Czas+!{}!Operacja+!{}!Status+!{}!NSekwencyjny+!{}!ID+!{}!Dane+!{}!".format(d["czas"],d["operacja"],d["status"],d["nr_sekwencyjny"],d["id"],d["data"]))
 
@@ -63,10 +75,3 @@ def printdecodemessage(d):
     #   "ACK"
     #   "PUSH"
     #   "SYNCH"
-
-    # Komunikaty :
-    #
-    # # Wiadomosc :
-    # # # Czas+!  !NSekwencyjny+! !ID+!   !Dane+! !
-    #
-    # # 
