@@ -59,7 +59,7 @@ def send_ack(sock, raw_data, adr_klienta):
     d = {}
     data = raw_data.decode("utf-8")
     d = protocol.decode_message(data)
-    ack_data = protocol.encode_messsage(time.ctime(time.time()),"ACK",d["status"],d["nr_sekwencyjny"],tablica_klientow[adr_klienta].id,"").encode("utf-8")
+    ack_data = protocol.encode_messsage_Operacja(time.ctime(time.time()),"ACK",0,tablica_klientow[adr_klienta].id).encode("utf-8") # Tu wywala blad !!
     sent = sock.sendto(ack_data, tablica_klientow[adr_klienta].adres_surowy)
     return sent
 

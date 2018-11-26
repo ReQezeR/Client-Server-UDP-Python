@@ -11,13 +11,13 @@ def encode_messsage_Operacja(czas,operacja,nr_sekwencyjny,id):
     return message
 
 # Pakiet z Statusem
-def encode_messsage_to_Status(czas,status,nr_sekwencyjny,id):
+def encode_messsage_Status(czas,status,nr_sekwencyjny,id):
     message = ""
     message = "Czas+!{}!Status+!{}!NSekwencyjny+!{}!ID+!{}!".format(czas,status,nr_sekwencyjny,id)
     return message
 
 # Pakiet z Danymi
-def encode_messsage_to_Dane(czas,nr_sekwencyjny,id,data):
+def encode_messsage_Dane(czas,nr_sekwencyjny,id,data):
     message = ""
     message = "Czas+!{}!NSekwencyjny+!{}!ID+!{}!Dane+!{}!".format(czas,nr_sekwencyjny,id,data)
     return message
@@ -26,28 +26,31 @@ def encode_messsage_to_Dane(czas,nr_sekwencyjny,id,data):
 
 
 def decode_message(raw_message):
-    message = ""
-    result = re.findall('(.*?)\+\!(.*?)\!', raw_message)
+    d = {"czas":0,"operacja":0,"status":0,"nr_sekwencyjny":0,"id":0,"data":0}
+    
 
+    message = ""
+    result1 = re.findall('(.*?)\+\!', raw_message)
+    result2 = re.findall('\+\!(.*?)\!', raw_message)
     # Pole 1
-    d["czas"]=result[2]
+    d["czas"]=result2[1]
     # Pole 2
-    if(result[3]=="Operacja"):
-        d["operacja"] = result[4]
-    elif(result[3]=="Status"):
-        d["status"] = result[4]
-    elif(result[3]=="NSekwencyjny"):
-        d["nr_sekwencyjny"] = result[4]
+    if(result1[1]=="Operacja"):
+        d["operacja"] = result2[2]
+    elif(result1[1]=="Status"):
+        d["status"] = result2[2]
+    elif(result1[1]=="NSekwencyjny"):
+        d["nr_sekwencyjny"] = result2[2]
     # Pole 3
-    if(result[5]=="NSekwencyjny"):
-        d["nr_sekwencyjny"] = result[6]
-    elif(result[5]=="ID"):
-        d["id"] = result[6]
+    if(result1[2]=="NSekwencyjny"):
+        d["nr_sekwencyjny"] = result2[3]
+    elif(result1[2]=="ID"):
+        d["id"] = result2[3]
     # Pole 4
-    if(result[7]=="Dane"):
-        d["data"] = result[8]
-    elif(result[7]=="ID"):
-        d["id"] = result[8]
+    if(result1[3]=="Dane"):
+        d["data"] = result2[4]
+    elif(result1[3]=="ID"):
+        d["id"] = result2[4]
     # Zwracamy 
     return d
     

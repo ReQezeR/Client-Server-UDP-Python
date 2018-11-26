@@ -11,7 +11,7 @@ dstHost = ("192.168.1.84", 65432)
  
 client_ID = -1
 
-client.sendto(protocol.encode_messsage(time.ctime(time.time()),0,0,0,client_ID,"CONNECT").encode('utf-8'),dstHost)
+client.sendto(protocol.encode_messsage_Operacja(time.ctime(time.time()),"CONNECT",0,client_ID).encode('utf-8'),dstHost)
  
 received_message = protocol.decode_message(client.recvfrom(1024)[0].decode("utf-8"))
  
@@ -21,7 +21,7 @@ def send_message():
     message = input()
     if len(message) != 0:
  
-        client.sendto(protocol.encode_messsage(time.ctime(time.time()), 0, 0, 0, client_ID, message).encode('utf-8'),
+        client.sendto(protocol.encode_messsage_Dane(time.ctime(time.time()), 0, client_ID, message).encode('utf-8'),
                   dstHost)
         #print("Send: ", message)
  
