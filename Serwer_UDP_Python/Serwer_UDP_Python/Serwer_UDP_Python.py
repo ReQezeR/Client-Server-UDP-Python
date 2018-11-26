@@ -26,6 +26,7 @@ class Klient():
 tablica_klientow = {}
 addr = []
 licznik_id = 1
+nsesji = 11
 #=========================================================
 # Funkcje : 
 
@@ -61,6 +62,27 @@ def send_ack(sock, raw_data, adr_klienta):
     sent = sock.sendto(ack_data, tablica_klientow[adr_klienta].adres_surowy)
     return sent
 
+def send_invite_accept(adres_surowy):
+    sock.sendto(protocol.encode_messsage_Operacja(time.ctime(time.time()), "INVITE", 0,1).encode('utf-8'),adres_surowy )
+    received_message1 = protocol.decode_message(sock.recvfrom(1024)[0].decode("utf-8"))
+
+    sock.sendto(protocol.encode_messsage_Status(time.ctime(time.time()), "ACCEPT", 0, 1).encode(('utf-8')),adres_surowy)
+    received_message2 = protocol.decode_message(sock.recvfrom(1024)[0].decode("utf-8"))
+
+    sock.sendto(protocol.encode_messsage_Dane(time.ctime(time.time()),0, 1, "").encode(('utf-8')),adres_surowy)
+    received_message3 = protocol.decode_message(sock.recvfrom(1024)[0].decode("utf-8"))
+    print("wyslano akceptacje")
+
+def send_invite_denied(adres_surowy):
+    sock.sendto(protocol.encode_messsage_Operacja(time.ctime(time.time()), "INVITE", 0, 1).encode('utf-8'),adres_surowy)
+    received_message1 = protocol.decode_message(sock.recvfrom(1024)[0].decode("utf-8"))
+
+    sock.sendto(protocol.encode_messsage_Status(time.ctime(time.time()), "DENIED", 0, 1).encode(('utf-8')),adres_surowy)
+    received_message2 = protocol.decode_message(sock.recvfrom(1024)[0].decode("utf-8"))
+
+    sock.sendto(protocol.encode_messsage_Dane(time.ctime(time.time()),0, 1, "").encode(('utf-8')),adres_surowy)
+    received_message3 = protocol.decode_message(sock.recvfrom(1024)[0].decode("utf-8"))
+    print("wyslano odmowe")
 
 #=========================================================
 # MAIN :
@@ -79,9 +101,14 @@ pakiet = {}
 
 
 def client_connect():
+    global nsesji
     global addr
+    adres_nadawcy =""
+    adres_odbiorcy=""
+
     client_data, client_address = sock.recvfrom(1024)  # Odebranie komunikatu
     adr_klienta = adr_to_klucz(client_address[0], client_address[1])  # Klucz klienta ("IPv4:Port")
+    adres_nadawcy = adr_klienta
 
     pakiet1 = protocol.decode_message(client_data.decode("utf-8"))  # Odkodowanie komunikatu
     
@@ -115,23 +142,79 @@ def client_connect():
             pakiet5 = protocol.decode_message(client_data.decode("utf-8"))
             addr.append(adr_klienta)
             print("Nowy klient!")
+
     # Obsługa INVITE>REQUEST
     elif pakiet1["operacja"] == "INVITE":
+        
         pakiet_ack = protocol.encode_messsage_Operacja(time.ctime(time.time()), "ACK", 0, pakiet1["id"]).encode("utf-8") # Utworzenie pakietu ACK
-        sock.sendto(pakiet_ack, tablica_klientow[adr_klienta].adres_surowy) # Wysłanie ACK na CONNECT
+        sock.sendto(pakiet_ack, tablica_klientow[adr_klienta].adres_surowy ) # Wysłanie ACK na CONNECT
+        print("otrzymalem invite")
 
         client_data, client_address = sock.recvfrom(1024) # Oczekiwanie na status REQUEST
         pakiet2 = protocol.decode_message(client_data.decode("utf-8")) # Odkodowanie pakietu
+        print(pakiet2)
+        
+        # Poszukiwanie adresu rozmowcy
+        for adres in tablica_klientow:
+            if adres != adres_nadawcy:
+                adres_odbiorcy = tablica_klientow[adres_nadawcy].adres_surowy
 
         if pakiet2["status"] == "REQUEST":
+            print("otrzymalem request")
             pakiet_ack = protocol.encode_messsage_Operacja(time.ctime(time.time()), "ACK", 0, pakiet2["id"]).encode("utf-8")
-            sock.sendto(pakiet_ack, tablica_klientow[adr_klienta].adres_surowy)
+            sock.sendto(pakiet_ack, client_address)
 
             client_data, client_address = sock.recvfrom(1024)
             pakiet3 = protocol.decode_message(client_data.decode("utf-8"))
             pakiet_ack = protocol.encode_messsage_Operacja(time.ctime(time.time()), "ACK", 0, pakiet3["id"]).encode("utf-8")
             sock.sendto(pakiet_ack, tablica_klientow[adr_klienta].adres_surowy)
-            # NIE DOKOŃCZONE !!!!
+
+            for adres in addr:
+                if adres != adr_to_klucz(client_address[0],client_address[1]):
+                    adres_odbiorcy = tablica_klientow[adres].adres_surowy
+            print(adr_to_klucz(client_address[0],client_address[1]))
+            print(adres_odbiorcy)
+            print("odebralem serie invite/request")
+            # Wysłanie serii komunikatow zapraszajacych do rozmowy
+            sock.sendto(protocol.encode_messsage_Operacja(time.ctime(time.time()), "INVITE", 0, tablica_klientow[adr_klienta].id).encode("utf-8"),adres_odbiorcy)
+            client_data, client_address = sock.recvfrom(1024)
+            pakiet4 = protocol.decode_message(client_data.decode("utf-8"))
+            sock.sendto(protocol.encode_messsage_Status(time.ctime(time.time()), "REQUEST", 0, tablica_klientow[adr_klienta].id).encode("utf-8"), adres_odbiorcy)
+            client_data, client_address = sock.recvfrom(1024)
+            pakiet5 = protocol.decode_message(client_data.decode("utf-8"))
+            sock.sendto(protocol.encode_messsage_Dane(time.ctime(time.time()),0,tablica_klientow[adr_klienta].id,"").encode("utf-8"),adres_odbiorcy)
+            client_data, client_address = sock.recvfrom(1024)
+            print("wyslalem invite request")
+            # Koniec serii
+
+        elif pakiet2["status"] == "ACCEPT":
+            print("odebralem invite/ ACCEPT")
+            pakiet_ack = protocol.encode_messsage_Operacja(time.ctime(time.time()), "ACK", 0, pakiet2["id"]).encode("utf-8")
+            sock.sendto(pakiet_ack, tablica_klientow[adr_klienta].adres_surowy)
+            for adres in addr:
+                if adres != adr_to_klucz(client_address[0],client_address[1]):
+                    adres_odbiorcy = tablica_klientow[adres].adres_surowy
+            send_invite_accept(adres_odbiorcy)
+            for adres in tablica_klientow:
+                if tablica_klientow[adres].adres_surowy == adres_odbiorcy:
+                    tablica_klientow[adres].nr_sesji=nsesji
+                elif tablica_klientow[adres].adres_surowy == client_address:
+                    tablica_klientow[adres].nr_sesji=nsesji
+            nsesji+=1
+            sock.sendto(protocol.encode_messsage_Dane(time.ctime(time.time()),0,tablica_klientow[adr_klienta].id,"ACCEPT").encode("utf-8"),tablica_klientow[adr_klienta].adres_surowy)
+            client_data, client_address = sock.recvfrom(1024)
+
+        elif pakiet2["status"] == "DENIED":
+            print("odebralem invite/ DENIED")
+            pakiet_ack = protocol.encode_messsage_Operacja(time.ctime(time.time()), "ACK", 0, pakiet2["id"]).encode("utf-8")
+            sock.sendto(pakiet_ack, tablica_klientow[adr_klienta].adres_surowy)
+            for adres in addr:
+                if adres != adr_to_klucz(client_address[0],client_address[1]):
+                    adres_odbiorcy = tablica_klientow[adres].adres_surowy
+            send_invite_denied(adres_odbiorcy)
+
+            sock.sendto(protocol.encode_messsage_Dane(time.ctime(time.time()),0,tablica_klientow[adr_klienta].id,"DENIED").encode("utf-8"),tablica_klientow[adr_klienta].adres_surowy)
+            client_data, client_address = sock.recvfrom(1024)
 
 
 
@@ -151,18 +234,15 @@ def info(addr):
         client_data, client_address = sock.recvfrom(1024)
 
 
-
+kaszanka =1
 while True:
     client_connect()
-    if len(addr) >= 2:
+    if len(addr) == 2 and kaszanka==1:
         info(addr[0])
         info(addr[1])
+        kaszanka+=1
 
 print("KONIEC!")
-
-
-
-
 
 
 
