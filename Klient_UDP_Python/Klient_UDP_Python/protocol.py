@@ -17,9 +17,9 @@ def encode_messsage_to_P2(czas,status,nr_sekwencyjny,id):
     return message
 
 # Pakiet z Danymi
-def encode_messsage_to_P3(czas,nr_sekwencyjny,id,dane):
+def encode_messsage_to_P3(czas,nr_sekwencyjny,id,data):
     message = ""
-    message = "Czas+!{}!Operacja+!{}!Status+!{}!NSekwencyjny+!{}!ID+!{}!Dane+!{}!".format(czas,nr_sekwencyjny,id,dane)
+    message = "Czas+!{}!NSekwencyjny+!{}!ID+!{}!Dane+!{}!".format(czas,nr_sekwencyjny,id,data)
     return message
 
 
@@ -27,16 +27,31 @@ def encode_messsage_to_P3(czas,nr_sekwencyjny,id,dane):
 
 def decode_message(raw_message):
     message = ""
-    result = re.findall('\+\!(.*?)\!', raw_message)
+    result = re.findall('(.*?)\+\!(.*?)\!', raw_message)
 
-    d["czas"]=result[0]
-    d["operacja"] = result[1]
-    d["status"]  = result[2]
-    d["nr_sekwencyjny"] = result[3]
-    d["id"] = result[4]
-    d["data"] = result[5]
+    # Pole 1
+    d["czas"]=result[2]
+    # Pole 2
+    if(result[3]=="Operacja"):
+        d["operacja"] = result[4]
+    elif(result[3]=="Status"):
+        d["status"] = result[4]
+    elif(result[3]=="NSekwencyjny"):
+        d["nr_sekwencyjny"] = result[4]
+    # Pole 3
+    if(result[5]=="NSekwencyjny"):
+        d["nr_sekwencyjny"] = result[6]
+    elif(result[5]=="ID"):
+        d["id"] = result[6]
+    # Pole 4
+    if(result[7]=="Dane"):
+        d["data"] = result[8]
+    elif(result[7]=="ID"):
+        d["id"] = result[8]
+    # Zwracamy 
     return d
     
+
 def printdecodemessage(d):
     print("Czas+!{}!Operacja+!{}!Status+!{}!NSekwencyjny+!{}!ID+!{}!Dane+!{}!".format(d["czas"],d["operacja"],d["status"],d["nr_sekwencyjny"],d["id"],d["data"]))
 
