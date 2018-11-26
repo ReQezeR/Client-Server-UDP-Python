@@ -57,7 +57,7 @@ def wyslij_do_sesji(sock, adr_klienta, client_data):
 
 # Przeslanie potwierdzenia otrzymania komunikatu
 def send_ack(sock, raw_data, adr_klienta):
-    ack_data = protocol.encode_messsage_Operacja(time.ctime(time.time()),"ACK", 0, tablica_klientow[adr_klienta].id).encode("utf-8") # Tu wywala blad !!
+    ack_data = protocol.encode_messsage_Operacja(time.ctime(time.time()),"ACK", 0, tablica_klientow[adr_klienta].id).encode("utf-8")
     sent = sock.sendto(ack_data, tablica_klientow[adr_klienta].adres_surowy)
     return sent
 
@@ -98,10 +98,12 @@ def client_connect():
         if pakiet2["status"] == "REQUEST": # Jezeli status == REQUEST
             pakiet_ack = protocol.encode_messsage_Operacja(time.ctime(time.time()), "ACK", 0, pakiet2["id"]).encode("utf-8")
             sock.sendto(pakiet_ack, tablica_klientow[adr_klienta].adres_surowy)
+
             client_data, client_address = sock.recvfrom(1024)
             pakiet3 = protocol.decode_message(client_data.decode("utf-8"))
             pakiet_ack = protocol.encode_messsage_Operacja(time.ctime(time.time()), "ACK", 0, pakiet3["id"]).encode("utf-8")
             sock.sendto(pakiet_ack, tablica_klientow[adr_klienta].adres_surowy)
+
             sock.sendto(protocol.encode_messsage_Operacja(time.ctime(time.time()), "CONNECT", 0, tablica_klientow[adr_klienta].id).encode("utf-8"),tablica_klientow[adr_klienta].adres_surowy)
             client_data, client_address = sock.recvfrom(1024)
             pakiet4 = protocol.decode_message(client_data.decode("utf-8"))
@@ -113,6 +115,26 @@ def client_connect():
             pakiet5 = protocol.decode_message(client_data.decode("utf-8"))
             addr.append(adr_klienta)
             print("Nowy klient!")
+    # Obsługa INVITE>REQUEST
+    elif pakiet1["operacja"] == "INVITE":
+        pakiet_ack = protocol.encode_messsage_Operacja(time.ctime(time.time()), "ACK", 0, pakiet1["id"]).encode("utf-8") # Utworzenie pakietu ACK
+        sock.sendto(pakiet_ack, tablica_klientow[adr_klienta].adres_surowy) # Wysłanie ACK na CONNECT
+
+        client_data, client_address = sock.recvfrom(1024) # Oczekiwanie na status REQUEST
+        pakiet2 = protocol.decode_message(client_data.decode("utf-8")) # Odkodowanie pakietu
+
+        if pakiet2["status"] == "REQUEST":
+            pakiet_ack = protocol.encode_messsage_Operacja(time.ctime(time.time()), "ACK", 0, pakiet2["id"]).encode("utf-8")
+            sock.sendto(pakiet_ack, tablica_klientow[adr_klienta].adres_surowy)
+
+            client_data, client_address = sock.recvfrom(1024)
+            pakiet3 = protocol.decode_message(client_data.decode("utf-8"))
+            pakiet_ack = protocol.encode_messsage_Operacja(time.ctime(time.time()), "ACK", 0, pakiet3["id"]).encode("utf-8")
+            sock.sendto(pakiet_ack, tablica_klientow[adr_klienta].adres_surowy)
+            # NIE DOKOŃCZONE !!!!
+
+
+
 
     elif pakiet1["operacja"]==0 and pakiet1["status"]==0:
         print("[ " + pakiet1["id"] + " ] " + pakiet1["data"])
@@ -137,6 +159,17 @@ while True:
         info(addr[1])
 
 print("KONIEC!")
+
+
+
+
+
+
+
+
+
+
+
 
 # =========================================================  Garbage :
 i=1
