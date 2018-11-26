@@ -86,14 +86,16 @@ def client_connect():
     pakiet1 = protocol.decode_message(client_data.decode("utf-8"))  # Odkodowanie komunikatu
     
 
-    if pakiet1["operacja"] == "CONNECT":
-        dodaj_klienta(adr_klienta, client_address)
-        pakiet_ack = protocol.encode_messsage_Operacja(time.ctime(time.time()), "ACK", 0, pakiet1["id"]).encode("utf-8")
-        sock.sendto(pakiet_ack, tablica_klientow[adr_klienta].adres_surowy)
-        client_data, client_address = sock.recvfrom(1024)
-        pakiet2 = protocol.decode_message(client_data.decode("utf-8"))
+    if pakiet1["operacja"] == "CONNECT": # Jezeli operacja = CONNECT
+        dodaj_klienta(adr_klienta, client_address) # Dodanie klienta do tablica_klientow
+        pakiet_ack = protocol.encode_messsage_Operacja(time.ctime(time.time()), "ACK", 0, pakiet1["id"]).encode("utf-8") # Utworzenie pakietu ACK
+        sock.sendto(pakiet_ack, tablica_klientow[adr_klienta].adres_surowy) # Wysłanie ACK na CONNECT
+        
+       
+        client_data, client_address = sock.recvfrom(1024) # Oczekiwanie na status REQUEST
+        pakiet2 = protocol.decode_message(client_data.decode("utf-8")) # Odkodowanie pakietu
 
-        if pakiet2["status"] == "REQUEST":
+        if pakiet2["status"] == "REQUEST": # Jezeli status == REQUEST
             pakiet_ack = protocol.encode_messsage_Operacja(time.ctime(time.time()), "ACK", 0, pakiet2["id"]).encode("utf-8")
             sock.sendto(pakiet_ack, tablica_klientow[adr_klienta].adres_surowy)
             client_data, client_address = sock.recvfrom(1024)
@@ -114,6 +116,7 @@ def client_connect():
 
     elif pakiet1["operacja"]==0 and pakiet1["status"]==0:
         print("[ " + pakiet1["id"] + " ] " + pakiet1["data"])
+        wyslij_do_sesji(sock, adr_klienta, client_data)
 
 #informowanie że jest dwóch klientów i mogą wysłać zaproszenie do komunikacji
 def info(addr):
@@ -135,7 +138,7 @@ while True:
 
 print("KONIEC!")
 
-# =========================================================  
+# =========================================================  Garbage :
 i=1
 if i == 0:
     client_data, client_address = sock.recvfrom(1024)  # Odebranie komunikatu

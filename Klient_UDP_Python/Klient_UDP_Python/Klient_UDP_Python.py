@@ -4,18 +4,24 @@ import time
 import protocol
 from _thread import *
  
+#=========================================================
 client = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 dstHost = ("192.168.1.84", 65432)
  
 client_ID = 0
+
+#=========================================================
+# Wysłanie sekwencji CONNECT>REQUEST>""
 print("Zadanie polaczenia z serwerem")
 client.sendto(protocol.encode_messsage_Operacja(time.ctime(time.time()), "CONNECT", 0, client_ID).encode('utf-8'), dstHost)
 received_message1 = protocol.decode_message(client.recvfrom(1024)[0].decode("utf-8"))
+
 client.sendto(protocol.encode_messsage_Status(time.ctime(time.time()), "REQUEST", 0, client_ID).encode(('utf-8')),dstHost)
 received_message2 = protocol.decode_message(client.recvfrom(1024)[0].decode("utf-8"))
+
 client.sendto(protocol.encode_messsage_Dane(time.ctime(time.time()),0, client_ID, "").encode(('utf-8')),dstHost)
 received_message3 = protocol.decode_message(client.recvfrom(1024)[0].decode("utf-8"))
- 
+
 received_message4 = protocol.decode_message(client.recvfrom(1024)[0].decode("utf-8"))
 client_ID = received_message4["id"]
 client.sendto(protocol.encode_messsage_Operacja(time.ctime(time.time()), "ACK", 0 , client_ID).encode("utf-8"), dstHost)

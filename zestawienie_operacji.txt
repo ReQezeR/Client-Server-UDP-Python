@@ -1,0 +1,9 @@
+Operacja:               Status:              Opis:
+CONNECT                 REQUEST              laczenie klienta z serwerem
+CONNECT                 CONNECTED            pakiet informujacy o polaczeniu z serwerem i otrzymaniu id
+INFO                    INVITATIONS_ACTIVE   informowanie ze klient moze wyslac zaproszenie do drugiego klienta
+INVITE                  REQUEST              wyslanie zaproszenia do innego klienta
+INVITE                  DENNY		     poinformowanie o odrzuceniu zaproszenia
+INVITE                  ACCEPT		     poinformowanie o zaakceptowaniu zaproszenia
+COMMUNICATE             CHANNEL_OPEN         informowanie ze klienci sie polaczyli i moga wysylac wiadomosci
+COMMUNICATE             SENT                 wyslanie wiadomosci od klienta do klienta
