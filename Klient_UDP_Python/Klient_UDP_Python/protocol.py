@@ -4,10 +4,26 @@ import re
 
 d = {}
 
-def encode_messsage(czas,operacja,status,nr_sekwencyjny,id,data):
+# Pakiet z Operacja
+def encode_messsage_to_P1(czas,operacja,nr_sekwencyjny,id):
     message = ""
-    message = "Czas+!{}!Operacja+!{}!Status+!{}!NSekwencyjny+!{}!ID+!{}!Dane+!{}!".format(czas,operacja,status,nr_sekwencyjny,id,data)
+    message = "Czas+!{}!Operacja+!{}!NSekwencyjny+!{}!ID+!{}!".format(czas,operacja,nr_sekwencyjny,id)
     return message
+
+# Pakiet z Statusem
+def encode_messsage_to_P2(czas,status,nr_sekwencyjny,id):
+    message = ""
+    message = "Czas+!{}!Status+!{}!NSekwencyjny+!{}!ID+!{}!".format(czas,status,nr_sekwencyjny,id)
+    return message
+
+# Pakiet z Danymi
+def encode_messsage_to_P3(czas,nr_sekwencyjny,id,dane):
+    message = ""
+    message = "Czas+!{}!Operacja+!{}!Status+!{}!NSekwencyjny+!{}!ID+!{}!Dane+!{}!".format(czas,nr_sekwencyjny,id,dane)
+    return message
+
+
+
 
 def decode_message(raw_message):
     message = ""
@@ -23,6 +39,18 @@ def decode_message(raw_message):
     
 def printdecodemessage(d):
     print("Czas+!{}!Operacja+!{}!Status+!{}!NSekwencyjny+!{}!ID+!{}!Dane+!{}!".format(d["czas"],d["operacja"],d["status"],d["nr_sekwencyjny"],d["id"],d["data"]))
+
+    # Operacja :
+    #   "ACK"
+    #   "PUSH"
+    #   "SYNCH"
+
+    # Komunikaty :
+    #
+    # # Wiadomosc :
+    # # # Czas+!  !NSekwencyjny+! !ID+!   !Dane+! !
+    #
+    # # 
 
 
     # Do modyfikacji!!!!!!!!!   V V V
