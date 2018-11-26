@@ -30,27 +30,28 @@ def decode_message(raw_message):
     
 
     message = ""
-    result1 = re.findall('(.*?)\+\!', raw_message)
+    result1 = re.findall('\!(\w*?)\+\!', raw_message)
     result2 = re.findall('\+\!(.*?)\!', raw_message)
     # Pole 1
-    d["czas"]=result2[1]
+    d["czas"]=result2[0]
     # Pole 2
-    if(result1[1]=="Operacja"):
-        d["operacja"] = result2[2]
-    elif(result1[1]=="Status"):
-        d["status"] = result2[2]
-    elif(result1[1]=="NSekwencyjny"):
-        d["nr_sekwencyjny"] = result2[2]
+    if(str(result1[0])=="Operacja"):
+        d["operacja"] = result2[1]
+    elif(result1[0]=="Status"):
+        d["status"] = result2[1]
+    elif(result1[0]=="NSekwencyjny"):
+        d["nr_sekwencyjny"] = result2[1]
     # Pole 3
-    if(result1[2]=="NSekwencyjny"):
-        d["nr_sekwencyjny"] = result2[3]
+    if(result1[1]=="NSekwencyjny"):
+        d["nr_sekwencyjny"] = result2[2]
+    elif(result1[1]=="ID"):
+        d["id"] = result2[2]
+    # Pole 4
+    if(result1[2]=="Dane"):
+        d["data"] = result2[3]
     elif(result1[2]=="ID"):
         d["id"] = result2[3]
-    # Pole 4
-    if(result1[3]=="Dane"):
-        d["data"] = result2[4]
-    elif(result1[3]=="ID"):
-        d["id"] = result2[4]
+
     # Zwracamy 
     return d
     

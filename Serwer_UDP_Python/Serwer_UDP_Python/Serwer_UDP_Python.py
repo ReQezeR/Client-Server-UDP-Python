@@ -56,10 +56,10 @@ def wyslij_do_sesji(sock, adr_klienta, client_data):
 
 # Przeslanie potwierdzenia otrzymania komunikatu
 def send_ack(sock, raw_data, adr_klienta):
-    d = {}
-    data = raw_data.decode("utf-8")
-    d = protocol.decode_message(data)
-    ack_data = protocol.encode_messsage_Operacja(time.ctime(time.time()),"ACK",0,tablica_klientow[adr_klienta].id).encode("utf-8") # Tu wywala blad !!
+    #d = {}
+    #data = raw_data.decode("utf-8")
+    #d = protocol.decode_message(data)
+    ack_data = protocol.encode_messsage_Operacja(time.ctime(time.time()),"ACK", 0, tablica_klientow[adr_klienta].id).encode("utf-8") # Tu wywala blad !!
     sent = sock.sendto(ack_data, tablica_klientow[adr_klienta].adres_surowy)
     return sent
 
@@ -86,13 +86,13 @@ while True:
 
     pakiet = protocol.decode_message(client_data.decode("utf-8"))   # Odkodowanie komunikatu
 
-    if pakiet["data"] == "CONNECT" and pakiet["id"] == "-1": 
+    if pakiet["operacja"] == "CONNECT" and pakiet["id"] == "-1": 
         print("Nowy klient!")
         dodaj_klienta(adr_klienta,client_address)
         sent = send_ack(sock, client_data, adr_klienta)
     else:
         send_ack(sock, client_data, adr_klienta)
-        wyslij_do_sesji(sock, adr_klienta, client_data)
+        #wyslij_do_sesji(sock, adr_klienta, client_data)
         print("[ "+pakiet["id"]+" ] "+pakiet["data"])
          
 
