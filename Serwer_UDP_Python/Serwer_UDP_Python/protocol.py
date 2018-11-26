@@ -5,19 +5,19 @@ import re
 d = {}
 
 # Pakiet z Operacja
-def encode_messsage_to_P1(czas,operacja,nr_sekwencyjny,id):
+def encode_messsage_Operacja(czas,operacja,nr_sekwencyjny,id):
     message = ""
     message = "Czas+!{}!Operacja+!{}!NSekwencyjny+!{}!ID+!{}!".format(czas,operacja,nr_sekwencyjny,id)
     return message
 
 # Pakiet z Statusem
-def encode_messsage_to_P2(czas,status,nr_sekwencyjny,id):
+def encode_messsage_to_Status(czas,status,nr_sekwencyjny,id):
     message = ""
     message = "Czas+!{}!Status+!{}!NSekwencyjny+!{}!ID+!{}!".format(czas,status,nr_sekwencyjny,id)
     return message
 
 # Pakiet z Danymi
-def encode_messsage_to_P3(czas,nr_sekwencyjny,id,data):
+def encode_messsage_to_Dane(czas,nr_sekwencyjny,id,data):
     message = ""
     message = "Czas+!{}!NSekwencyjny+!{}!ID+!{}!Dane+!{}!".format(czas,nr_sekwencyjny,id,data)
     return message
