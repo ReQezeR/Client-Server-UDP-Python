@@ -114,15 +114,16 @@ def client_connect():
     
 
     if pakiet1["operacja"] == "CONNECT": # Jezeli operacja = CONNECT
-        dodaj_klienta(adr_klienta, client_address) # Dodanie klienta do tablica_klientow
+        
         pakiet_ack = protocol.encode_messsage_Operacja(time.ctime(time.time()), "ACK", 0, pakiet1["id"]).encode("utf-8") # Utworzenie pakietu ACK
-        sock.sendto(pakiet_ack, tablica_klientow[adr_klienta].adres_surowy) # Wysłanie ACK na CONNECT
+        sock.sendto(pakiet_ack, client_address) # Wysłanie ACK na CONNECT
         
        
         client_data, client_address = sock.recvfrom(1024) # Oczekiwanie na status REQUEST
         pakiet2 = protocol.decode_message(client_data.decode("utf-8")) # Odkodowanie pakietu
 
         if pakiet2["status"] == "REQUEST": # Jezeli status == REQUEST
+            dodaj_klienta(adr_klienta, client_address) # Dodanie klienta do tablica_klientow
             pakiet_ack = protocol.encode_messsage_Operacja(time.ctime(time.time()), "ACK", 0, pakiet2["id"]).encode("utf-8")
             sock.sendto(pakiet_ack, tablica_klientow[adr_klienta].adres_surowy)
 
@@ -142,6 +143,24 @@ def client_connect():
             pakiet5 = protocol.decode_message(client_data.decode("utf-8"))
             addr.append(adr_klienta)
             print("Nowy klient!")
+
+     # Obsługa DISCONNECT
+    elif pakiet1["operacja"] == "DISCONNECT": 
+        print("Otrzymano DISCONNECT")
+        pakiet_ack = protocol.encode_messsage_Operacja(time.ctime(time.time()), "ACK", 0, pakiet1["id"]).encode("utf-8")# ACK dla DISCONNECT
+        sock.sendto(pakiet_ack, tablica_klientow[adr_klienta].adres_surowy) # Wyslanie ACK
+        # Koniec obslugi klienta ktory wywolal CLOSE
+        print("Koniec obslugi klienta ktory wywolal CLOSE")
+
+        #Przeslanie info o rozlaczeniu do drugiego klienta
+        for adres in addr:
+            if adres != adr_to_klucz(client_address[0],client_address[1]):
+                  adres_odbiorcy = tablica_klientow[adres].adres_surowy
+
+        pakiet_ack = protocol.encode_messsage_Operacja(time.ctime(time.time()), "DISCONNECTED", 0, pakiet1["id"]).encode("utf-8")
+        sock.sendto(pakiet_ack,adres_odbiorcy)# Wyslanie info o rozlaczeniu
+        pakiet4 = protocol.decode_message(client_data.decode("utf-8"))# Otrzymanie ACK
+
 
     # Obsługa INVITE>REQUEST
     elif pakiet1["operacja"] == "INVITE":
