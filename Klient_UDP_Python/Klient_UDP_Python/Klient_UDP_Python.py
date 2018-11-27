@@ -130,7 +130,6 @@ def send_message():
  
 def recv_message():
     while True:
-
         received_message = protocol.decode_message(client.recvfrom(1024)[0].decode("utf-8"))
         client.sendto(protocol.encode_messsage_Operacja(time.ctime(time.time()), "ACK", 0 , client_ID).encode("utf-8"), dstHost)
         print("[ " + str(received_message["id"]) + " ]> " + str(received_message["data"]))
