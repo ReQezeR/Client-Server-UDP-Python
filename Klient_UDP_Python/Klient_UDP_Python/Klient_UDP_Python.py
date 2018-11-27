@@ -6,7 +6,7 @@ from _thread import *
  
 #=========================================================
 client = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-dstHost = ("192.168.1.84", 65432)
+dstHost = ("127.0.0.1", 65432)
  
 client_ID = 0
 flaga_odpowiedzi_na_invite = False
@@ -131,8 +131,9 @@ def send_message():
 def recv_message():
     while True:
         received_message = protocol.decode_message(client.recvfrom(1024)[0].decode("utf-8"))
-        client.sendto(protocol.encode_messsage_Operacja(time.ctime(time.time()), "ACK", 0 , client_ID).encode("utf-8"), dstHost)
-        print("[ " + str(received_message["id"]) + " ]> " + str(received_message["data"]))
+        if received_message["operacja"]==0 and received_message["status"]==0:
+            client.sendto(protocol.encode_messsage_Operacja(time.ctime(time.time()), "ACK", 0 , client_ID).encode("utf-8"), dstHost)
+            print("[ " + str(received_message["id"]) + " ]> " + str(received_message["data"]))
             
      
 print("Rozpoczecie komunikacji: ")

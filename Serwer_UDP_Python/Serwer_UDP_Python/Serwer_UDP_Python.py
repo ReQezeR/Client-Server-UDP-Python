@@ -89,7 +89,7 @@ def send_invite_denied(adres_surowy):
 
 sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)     # Gniazdo
 
-server_address = '192.168.1.84'                             # Adres IPv4 serwera
+server_address = '127.0.0.1'                             # Adres IPv4 serwera
 server_port = 65432                                         # Port serwera
 
 server = (server_address, server_port)
@@ -219,8 +219,14 @@ def client_connect():
 
 
 
-    elif pakiet1["operacja"]==0 and pakiet1["status"]==0:
+    elif pakiet1["operacja"]==0 and pakiet1["status"]==0 and pakiet1["data"] != 0:
         print("[ " + pakiet1["id"] + " ] " + pakiet1["data"])
+        for adres in tablica_klientow:
+            if adres == adres_nadawcy:
+                adres_odbiorcy = tablica_klientow[adres_nadawcy].adres_surowy
+        pakiet_ack = protocol.encode_messsage_Operacja(time.ctime(time.time()), "ACK", 0, pakiet1["id"]).encode("utf-8")
+        sock.sendto(pakiet_ack, adres_odbiorcy)
+
         wyslij_do_sesji(sock, adr_klienta, client_data)
 
 #informowanie że jest dwóch klientów i mogą wysłać zaproszenie do komunikacji
