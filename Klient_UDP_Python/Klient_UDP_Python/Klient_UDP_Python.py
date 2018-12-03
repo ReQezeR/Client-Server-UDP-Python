@@ -194,44 +194,48 @@ def recv_message():
     global numer_sekwencyjny
     while True:
         if flaga_rozlaczenia == False:
-            recv_m1 = protocol.decode_message(client.recvfrom(1024)[0].decode("utf-8"))
-            print("1: "+str(recv_m1))
-            print(recv_m1["operacja"])
+            while True:
+                recv_m1 = protocol.decode_message(client.recvfrom(1024)[0].decode("utf-8"))
+                #print("1: "+str(recv_m1))
+                #print(recv_m1["operacja"])
 
-            #if received_message1["operacja"]== "COMMUNICATE":
-            if int(recv_m1["nr_sekwencyjny"])>1:
-                recv_m2 = protocol.decode_message(client.recvfrom(1024)[0].decode("utf-8"))
-                print("2: "+str(recv_m2))
-                #if str(received_message2["status"]) == "SENT":
-                if int(recv_m2["nr_sekwencyjny"])>1:
-                    recv_m3 = protocol.decode_message(client.recvfrom(1024)[0].decode("utf-8"))
+                #if received_message1["operacja"]== "COMMUNICATE":
+                if int(recv_m1["nr_sekwencyjny"])>1:
 
-                    print("[ " + str(recv_m3["id"]) + " ]> " + str(recv_m3["data"]))
+                    recv_m2 = protocol.decode_message(client.recvfrom(1024)[0].decode("utf-8"))
+                    #print("2: "+str(recv_m2))
+                    #if str(received_message2["status"]) == "SENT":
+                    if int(recv_m2["nr_sekwencyjny"])>1:
+                        recv_m3 = protocol.decode_message(client.recvfrom(1024)[0].decode("utf-8"))
 
-                    numer_sekwencyjny = 1
+                        print("[ " + str(recv_m3["id"]) + " ]> " + str(recv_m3["data"]))
+
+                        numer_sekwencyjny = 1
+                        pakiet_ack = protocol.encode_messsage_Operacja(time.ctime(time.time()), "ACK", numer_sekwencyjny, client_ID).encode("utf-8") # Utworzenie pakietu ACK
+                        client.sendto(pakiet_ack, dstHost) # ACK SEND
+                    else:
+                        print("XD")
+                # DO zmiany !!!!!!
+                elif recv_m1["operacja"]=="DISCONNECTED":
                     pakiet_ack = protocol.encode_messsage_Operacja(time.ctime(time.time()), "ACK", numer_sekwencyjny, client_ID).encode("utf-8") # Utworzenie pakietu ACK
-                    client.sendto(pakiet_ack, dstHost) # ACK SEND
-                else:
-                    print("XD")
-            # DO zmiany !!!!!!
-            elif recv_m1["operacja"]=="DISCONNECTED":
-                pakiet_ack = protocol.encode_messsage_Operacja(time.ctime(time.time()), "ACK", numer_sekwencyjny, client_ID).encode("utf-8") # Utworzenie pakietu ACK
-                client.sendto(pakiet_ack, dstHost) # Wysłanie ACK na DISCONNCONNECTED
-                numer_sekwencyjny+=1
-                flaga_rozlaczenia = True
-                print("Klient sie rozlaczyl")
-                return 0
+                    client.sendto(pakiet_ack, dstHost) # Wysłanie ACK na DISCONNCONNECTED
+                    numer_sekwencyjny+=1
+                    flaga_rozlaczenia = True
+                    print("Klient sie rozlaczyl")
+                    return 0
            
 
 #========================================================================
 
 if flaga_odpowiedzi_na_invite == True:
     print("Rozpoczecie komunikacji: ")
+
+    start_new_thread(recv_message, ())# recv tworzymy raz
     while True:
         if flaga_rozlaczenia == True:
             break
-        start_new_thread(send_message, ())  
-        start_new_thread(recv_message, ())
+        start_new_thread(send_message, ()) # send się odnawia
+        
         time.sleep(2)
 
     print("CLOSE: koniec obslugi")
