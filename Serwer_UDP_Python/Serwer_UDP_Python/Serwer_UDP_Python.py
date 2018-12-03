@@ -23,7 +23,7 @@ class Klient():
 #=========================================================
 # Zmienne globalne : 
 
-numer_sekwencyjny = 100
+numer_sekwencyjny = 1
 tablica_klientow = {}
 addr = []
 licznik_id = 1
@@ -122,8 +122,8 @@ def client_connect():
 
     if pakiet1["operacja"] == "CONNECT": # Jezeli operacja = CONNECT
         
-        pakiet_ack = protocol.encode_messsage_Operacja(time.ctime(time.time()), "ACK", numer_sekwencyjny, pakiet1["id"]).encode("utf-8") # Utworzenie pakietu ACK
-        sock.sendto(pakiet_ack, client_address) # Wysłanie ACK na CONNECT
+        #pakiet_ack = protocol.encode_messsage_Operacja(time.ctime(time.time()), "ACK", numer_sekwencyjny, pakiet1["id"]).encode("utf-8") # Utworzenie pakietu ACK
+        #sock.sendto(pakiet_ack, client_address) # Wysłanie ACK na CONNECT
        
        
         client_data, client_address = sock.recvfrom(1024) # Oczekiwanie na status REQUEST
@@ -225,7 +225,7 @@ def client_connect():
                 if adres != adr_to_klucz(client_address[0],client_address[1]):
                     adres_odbiorcy = tablica_klientow[adres].adres_surowy
 
-            send_invite_accept(adres_odbiorcy)
+            send_invite_accept(adres_odbiorcy)# wyslanie potwierdzenia zaproszenia
 
             for adres in tablica_klientow:
                 if tablica_klientow[adres].adres_surowy == adres_odbiorcy:
@@ -233,9 +233,10 @@ def client_connect():
                 elif tablica_klientow[adres].adres_surowy == client_address:
                     tablica_klientow[adres].nr_sesji=nsesji
             nsesji+=1
-
-            sock.sendto(protocol.encode_messsage_Dane(time.ctime(time.time()),numer_sekwencyjny,tablica_klientow[adr_klienta].id,"ACCEPT").encode("utf-8"),tablica_klientow[adr_klienta].adres_surowy)
-            client_data, client_address = sock.recvfrom(1024)
+            #print("FLAGA [0]")
+            #sock.sendto(protocol.encode_messsage_Dane(time.ctime(time.time()),numer_sekwencyjny,tablica_klientow[adr_klienta].id,"ACCEPT").encode("utf-8"),tablica_klientow[adr_klienta].adres_surowy)
+            #client_data, client_address = sock.recvfrom(1024)
+            #print("FLAGA [1]")
 
         elif pakiet2["status"] == "DENY":
             print("odebralem invite/ DENY")
@@ -258,7 +259,6 @@ def client_connect():
         print("otrzymalem COMMUNICATE")
         client_data, client_address = sock.recvfrom(1024) # Oczekiwanie na status REQUEST
         pakiet2 = protocol.decode_message(client_data.decode("utf-8")) # Odkodowanie pakietu
-        
 
         if pakiet2["status"]=="SENT":
             #wyslij_do_sesji(sock, adr_klienta, client_data)
