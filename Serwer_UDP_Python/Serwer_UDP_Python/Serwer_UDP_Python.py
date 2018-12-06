@@ -24,12 +24,23 @@ class Klient():
 # Zmienne globalne : 
 
 numer_sekwencyjny = 1
+flaga_pary =1
 tablica_klientow = {}
 addr = []
 licznik_id = 1
 nsesji = 11
 #=========================================================
 # Funkcje : 
+
+# Reset parametrów po zakończeniu aktualnie obsługiwanej sesji
+def reset_sesji():
+    global tablica_klientow
+    global addr
+    global flaga_pary
+    flaga_pary = 1
+    tablica_klientow.clear()
+    addr.clear()
+    print("Wyczyszczono dane!")
 
 # Zamiana adresu surowego na klucz
 def adr_to_klucz(ca1,ca2):
@@ -39,7 +50,6 @@ def adr_to_klucz(ca1,ca2):
 def dodaj_klienta(adr_klienta,client_address):
     global licznik_id
     klient_temp = Klient()
-    #klient_temp.init_klient(licznik_id,adr_klienta,client_address)     #cos tu nie dziala :/
     klient_temp.id = licznik_id
     klient_temp.adres_surowy = client_address
     klient_temp.adres_kluczowy = adr_klienta
@@ -173,6 +183,7 @@ def client_connect():
             pakiet5 = protocol.decode_message(client_data.decode("utf-8"))# Otrzymanie ACK
             print("[SERWER] Koniec obslugi drugiego klienta")
             # Koniec obslugi drugiego klienta
+            reset_sesji()
 
     # Obsługa INVITE>REQUEST
     elif pakiet1["operacja"] == "INVITE":
@@ -280,44 +291,12 @@ def info(addr,addr_partnera):
         sock.sendto(protocol.encode_messsage_Status(time.ctime(time.time()), "INVITATIONS_ACTIVE", numer_sekwencyjny, tablica_klientow[addr_partnera].id).encode("utf-8"),tablica_klientow[addr].adres_surowy)
         client_data, client_address = sock.recvfrom(1024)# ACK RECV
 
-kaszanka =1
+
 while True:
     client_connect()
-    if len(addr) == 2 and kaszanka==1:
+    if len(addr) == 2 and flaga_pary==1:
         info(addr[0],addr[1])
         info(addr[1],addr[0])
-        kaszanka+=1
+        flaga_pary+=1
 
 print("KONIEC!")
-
-
-
-
-
-
-
-
-# =========================================================  Garbage :
-i=1
-if i == 0:
-    client_data, client_address = sock.recvfrom(1024)  # Odebranie komunikatu
-
-    adr_klienta = adr_to_klucz(client_address[0], client_address[1])  # Klucz klienta ("IPv4:Port")
-
-    pakiet = protocol.decode_message(client_data.decode("utf-8"))  # Odkodowanie komunikatu
-
-    if pakiet["operacja"] == "CONNECT" and pakiet["id"] == "-1":
-
-        print("[SERWER] Nowy klient!")
-
-        dodaj_klienta(adr_klienta, client_address)
-
-        sent = send_ack(sock, client_data, adr_klienta)
-
-    else:
-
-        send_ack(sock, client_data, adr_klienta)
-
-        # wyslij_do_sesji(sock, adr_klienta, client_data)
-
-        print("[ " + pakiet["id"] + " ] " + pakiet["data"])
