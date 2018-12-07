@@ -258,6 +258,7 @@ def client_connect():
 
             sock.sendto(protocol.encode_messsage_Dane(time.ctime(time.time()),numer_sekwencyjny,tablica_klientow[adr_klienta].id,"DENY").encode("utf-8"),tablica_klientow[adr_klienta].adres_surowy)
             client_data, client_address = sock.recvfrom(1024)
+            reset_sesji()
 
 
     elif pakiet1["operacja"]=="COMMUNICATE":
